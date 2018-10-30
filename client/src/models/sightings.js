@@ -11,7 +11,10 @@ Sightings.prototype.bindEvents = function () {
     this.deleteSighting(evt.detail);
   });
   // subscribe SightingFormView:sighting-submitted
-  // call this.postSighting pass along the info
+  PubSub.subscribe("SightingFormView:sighting-submitted", (evt) => {
+    // call this.postSighting pass along the info
+    this.postSighting(evt.detail);
+  })
 };
 
 Sightings.prototype.getData = function () {
@@ -22,11 +25,16 @@ Sightings.prototype.getData = function () {
     .catch(console.error);
 };
 
-// Sightings.prototype.postSighting =
 // passed in sighting
-// make a post request to the api to save the data
-// publish the response which will be the full list of sightings 'Sightings:data-loaded'
-// catch(console.error);
+Sightings.prototype.postSighting = function(sighting){
+  // make a post request to the api to save the data
+  this.request.post(sighting)
+    .then((sightings) =>{
+      // publish the response which will be the full list of sightings 'Sightings:data-loaded'
+      PubSub.publish('Sightings:data-loaded', sightings)
+    })
+    .catch(console.error);
+}
 
 Sightings.prototype.deleteSighting = function (sightingId) {
   this.request.delete(sightingId)
